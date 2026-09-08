@@ -1,11 +1,4 @@
 import com.google.gms.googleservices.GoogleServicesPlugin.MissingGoogleServicesStrategy
-import java.io.File
-import org.gradle.api.DefaultTask
-import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.TaskAction
 
 plugins {
   alias(libs.plugins.android.application)
@@ -145,47 +138,3 @@ dependencies {
   "ksp"(libs.androidx.room.compiler)
   "ksp"(libs.moshi.kotlin.codegen)
 }
-
-abstract class CopyApkTask : DefaultTask() {
-  @get:InputFile
-  abstract val apkFile: RegularFileProperty
-
-  @get:OutputDirectory
-  abstract val outputDir: DirectoryProperty
-
-  @TaskAction
-  fun copy() {
-    val src = apkFile.get().asFile
-    if (!src.exists() || src.length() == 0L) {
-      throw GradleException("Generated APK not found or empty at: ${src.absolutePath}")
-    }
-    val outDir = outputDir.get().asFile
-    if (!outDir.exists()) {
-      outDir.mkdirs()
-    }
-    val dest = File(outDir, "app-debug.apk")
-    if (dest.exists()) {
-      dest.delete()
-    }
-    src.copyTo(dest, overwrite = true)
-    if (!dest.exists() || dest.length() == 0L) {
-      throw GradleException("Failed to copy APK to: ${dest.absolutePath}")
-    }
-    println("Successfully copied debug APK (${dest.length()} bytes) to: ${dest.absolutePath}")
-  }
-}
-
-val copyDebugApk = tasks.register<CopyApkTask>("copyDebugApk") {
-  group = "build"
-  description = "Copies generated debug APK to build-outputs/app-debug.apk"
-  dependsOn(tasks.matching { it.name == "packageDebug" })
-  apkFile.set(layout.buildDirectory.file("outputs/apk/debug/app-debug.apk"))
-  outputDir.set(layout.projectDirectory.dir("../build-outputs"))
-}
-
-tasks.matching { it.name == "assembleDebug" }.configureEach {
-  finalizedBy(copyDebugApk)
-}
-
-
-
