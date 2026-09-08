@@ -1,0 +1,7 @@
+{
+  "name": "Adaptive Exam Tutor",
+  "description": "AI-powered competitive exam tutor for SSC, Railway, and Banking with adaptive practice, mistake diagnosis, and concept bridging.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
